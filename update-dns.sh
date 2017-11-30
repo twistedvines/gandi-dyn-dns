@@ -52,7 +52,30 @@ source_dot_env_file() {
   fi
 }
 
-source_dot_env_file
+parse_opts() {
+  local opts=$@
+  while getopts 'k:d:n:u:' opt; do
+    case "$opt" in
+      k)
+        GANDI_API_KEY="$OPTARG"
+        ;;
+      d)
+        SUBDOMAIN="$OPTARG"
+        ;;
+      n)
+        ZONE_FILE_NAME="$OPTARG"
+        ;;
+      u)
+        ZONE_FILE_UUID="$OPTARG"
+    esac
+  done
+}
+
+parse_opts $@
+if [ -z "$GANDI_API_KEY" ]; then
+  # assuming no args were passed
+  source_dot_env_file
+fi
 
 if [ -z "$ZONE_FILE_UUID" ]; then
   if [ -z "$ZONE_FILE_NAME" ]; then
