@@ -4,7 +4,20 @@ set -e
 
 get_zones() {
   local api_key="$1"
-  curl -s -H "X-Api-Key: $api_key" https://dns.api.gandi.net/api/v5/zones
+  local result="$(
+    curl -s -H "X-Api-Key: $api_key" \
+      https://dns.api.gandi.net/api/v5/zones
+  )"
+
+  local code="$(echo "$result" | jq -r '.code?')"
+
+  if [[ "$code" != 'null' ]] && [[ "$code" != '200' ]]; then
+    echo "An error occurred getting zones: $(echo "$result" | jq -r '.message')" \
+      1>&2
+    return 1
+  fi
+
+  echo "$result"
 }
 
 get_zone() {
