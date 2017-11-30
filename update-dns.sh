@@ -36,3 +36,7 @@ create_dns_record() {
     -d "$payload" \
     "https://dns.api.gandi.net/api/v5/zones/${zone_file_uuid}/records")"
 }
+
+get_external_ip_address() {
+  curl -s https://api.ipify.org
+}
