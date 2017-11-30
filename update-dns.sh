@@ -10,3 +10,8 @@ get_zone() {
   local zones="$2"
   echo "$zones" | jq ".[] | select(name == $name)"
 }
+
+get_zone_uuid() {
+  local zone="$1"
+  echo "$zone" | jq '.uuid'
+}
