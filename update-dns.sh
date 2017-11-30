@@ -10,12 +10,12 @@ get_zones() {
 get_zone() {
   local name="$1"
   local zones="$2"
-  echo "$zones" | jq ".[] | select(name == $name)"
+  echo "$zones" | jq ".[] | select(.name == \"$name\")"
 }
 
 get_zone_uuid() {
   local zone="$1"
-  echo "$zone" | jq '.uuid'
+  echo "$zone" | jq -r '.uuid'
 }
 
 create_dns_record() {
