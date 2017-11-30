@@ -11,7 +11,9 @@ get_zones() {
 
   local code="$(echo "$result" | jq -r '.code?')"
 
-  if [[ "$code" != 'null' ]] && [[ "$code" != '200' ]]; then
+  [[ "$code" == 'null' ]] && code=
+
+  if [[ -n "$code" ]] && [[ "$code" != '200' ]]; then
     echo "An error occurred getting zones: $(echo "$result" | jq -r '.message')" \
       1>&2
     return 1
