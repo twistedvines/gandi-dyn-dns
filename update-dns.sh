@@ -25,20 +25,49 @@ create_dns_record() {
   local zone_file_uuid="$4"
 
   local payload="$( \
-    jq ".rrset_name = \"$domain\" |"`
+    echo '{}' | jq ".rrset_name = \"$domain\" |"`
       `'.rrset_type = "A" |'`
       `'.rrset_ttl = 3600 |'`
-      `"rrset_values = [\"$ip_address\"]"
+      `".rrset_values = [\"$ip_address\"]"
   )"
 
   local result="$(curl -s \
-    -X PUT \
+    -X POST \
     -H 'Content-Type: application/json' \
     -H "X-Api-Key: $api_key" \
     -d "$payload" \
     "https://dns.api.gandi.net/api/v5/zones/${zone_file_uuid}/records")"
+  echo "$result"
 }
 
 get_external_ip_address() {
   curl -s https://api.ipify.org
 }
+
+source_dot_env_file() {
+  if [ -f '.env.local' ]; then
+    source '.env.local'
+  else
+    source '.env'
+  fi
+}
+
+source_dot_env_file
+
+if [ -z "$ZONE_FILE_UUID" ]; then
+  if [ -z "$ZONE_FILE_NAME" ]; then
+    echo "neither ZONE_FILE_UUID or ZONE_FILE_NAME is set: quitting." \
+      1>&2
+    exit 1
+  fi
+  zones="$(get_zones "$GANDI_API_KEY")"
+  zone="$(get_zone "$ZONE_FILE_NAME" "$zones")"
+  ZONE_FILE_UUID="$(get_zone_uuid "$zone")"
+fi
+
+ip_address="$(get_external_ip_address)"
+create_dns_record \
+  "$GANDI_API_KEY" \
+  "$SUBDOMAIN" \
+  "$ip_address" \
+  "$ZONE_FILE_UUID"
