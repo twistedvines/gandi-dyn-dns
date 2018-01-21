@@ -37,6 +37,16 @@ get_records() {
       "https://dns.api.gandi.net/api/v5/zones/$zone_uuid/records"
   )"
 
+  local code="$(echo "$result" | jq -r '.code?')"
+
+  [[ "$code" == 'null' ]] && code=
+
+  if [[ -n "$code" ]] && [[ "$code" != '200' ]]; then
+    echo "An error occurred getting zones: $(echo "$result" | \
+      jq -r '.message')" 1>&2
+    return 1
+  fi
+
   echo "$result"
 }
 
